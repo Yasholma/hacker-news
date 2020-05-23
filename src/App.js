@@ -18,6 +18,7 @@ class App extends React.Component {
         results: null,
         searchTerm: DEFAULT_QUERY,
         searchKey: "",
+        error: null,
     };
 
     setSearchTopstories = result => {
@@ -39,7 +40,9 @@ class App extends React.Component {
         )
             .then(response => response.json())
             .then(result => this.setSearchTopstories(result))
-            .catch(e => e);
+            .catch(e => {
+                this.setState({ error: e });
+            });
     };
 
     needsToSearchTopStories = searchTerm => !this.state.results[searchTerm];
@@ -74,7 +77,7 @@ class App extends React.Component {
     };
 
     render() {
-        const { searchTerm, results, searchKey } = this.state;
+        const { searchTerm, results, searchKey, error } = this.state;
         let page =
             (results && results[searchKey] && results[searchKey].page) || 0;
         const list =
@@ -91,7 +94,13 @@ class App extends React.Component {
                         Search
                     </Search>
                 </div>
-                <Table list={list} onDismiss={this.onDismiss} />
+                {!error ? (
+                    <Table list={list} onDismiss={this.onDismiss} />
+                ) : (
+                    <div className='interactions'>
+                        <p>Something went wrong.</p>
+                    </div>
+                )}
                 <div className='interactions'>
                     <Button
                         onClick={() =>
