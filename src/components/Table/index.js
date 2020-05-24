@@ -1,8 +1,5 @@
 import React from "react";
-import Button from "./Button";
-
-const isSearched = searchTerm => item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase());
+import Button from "../Buttons/index.js";
 
 const Table = ({ list, onDismiss }) => (
     <div className='table'>
