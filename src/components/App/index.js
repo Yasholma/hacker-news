@@ -14,6 +14,10 @@ import {
     PARAM_PAGE,
     PATH_SEARCH,
 } from "./../../constants";
+import Loading from "../Loading";
+import { withLoading } from "../../hoc";
+
+const ButtonWithLoading = withLoading(Button);
 
 class App extends React.Component {
     state = {
@@ -21,6 +25,7 @@ class App extends React.Component {
         searchTerm: DEFAULT_QUERY,
         searchKey: "",
         error: null,
+        isLoading: false,
     };
 
     _isMounted = false;
@@ -35,10 +40,12 @@ class App extends React.Component {
         const updatedHits = [...oldHits, ...hits];
         this.setState({
             results: { ...results, [searchKey]: { hits: updatedHits, page } },
+            isLoading: false,
         });
     };
 
     fetchSearchTopstories = (searchTerm, page = 0) => {
+        this.setState({ isLoading: true });
         axios(
             `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`,
         )
@@ -46,7 +53,11 @@ class App extends React.Component {
                 result =>
                     this._isMounted && this.setSearchTopstories(result.data),
             )
-            .catch(e => this._isMounted && this.setState({ error: e }));
+            .catch(
+                e =>
+                    this._isMounted &&
+                    this.setState({ error: e, isLoading: false }),
+            );
     };
 
     needsToSearchTopStories = searchTerm => !this.state.results[searchTerm];
@@ -86,7 +97,7 @@ class App extends React.Component {
     };
 
     render() {
-        const { searchTerm, results, searchKey, error } = this.state;
+        const { searchTerm, results, searchKey, error, isLoading } = this.state;
         let page =
             (results && results[searchKey] && results[searchKey].page) || 0;
         const list =
@@ -111,13 +122,14 @@ class App extends React.Component {
                     </div>
                 )}
                 <div className='interactions'>
-                    <Button
+                    <ButtonWithLoading
+                        isLoading={isLoading}
                         onClick={() =>
                             this.fetchSearchTopstories(searchKey, (page += 1))
                         }
                     >
                         More
-                    </Button>
+                    </ButtonWithLoading>
                 </div>
             </div>
         );

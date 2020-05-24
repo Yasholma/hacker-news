@@ -6,7 +6,6 @@ exports[`Search has a valid snapshot 1`] = `
   <input
     type="text"
   />
-   
   <button
     type="submit"
   />
