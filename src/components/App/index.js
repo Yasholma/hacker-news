@@ -14,10 +14,25 @@ import {
     PARAM_PAGE,
     PATH_SEARCH,
 } from "./../../constants";
-import Loading from "../Loading";
 import { withLoading } from "../../hoc";
 
 const ButtonWithLoading = withLoading(Button);
+
+export const updateSearchTopStoriesState = (hits, page) => prevState => {
+    const { searchKey, results } = prevState;
+
+    const oldHits =
+        results && results[searchKey] ? results[searchKey].hits : [];
+
+    const updatedHits = [...oldHits, ...hits];
+    return {
+        results: {
+            ...results,
+            [searchKey]: { hits: updatedHits, page },
+        },
+        isLoading: false,
+    };
+};
 
 class App extends React.Component {
     state = {
@@ -30,18 +45,8 @@ class App extends React.Component {
 
     _isMounted = false;
 
-    setSearchTopstories = result => {
-        const { hits, page } = result;
-        const { searchKey, results } = this.state;
-
-        const oldHits =
-            results && results[searchKey] ? results[searchKey].hits : [];
-
-        const updatedHits = [...oldHits, ...hits];
-        this.setState({
-            results: { ...results, [searchKey]: { hits: updatedHits, page } },
-            isLoading: false,
-        });
+    setSearchTopstories = ({ hits, page }) => {
+        this.setState(updateSearchTopStoriesState(hits, page));
     };
 
     fetchSearchTopstories = (searchTerm, page = 0) => {
@@ -98,6 +103,7 @@ class App extends React.Component {
 
     render() {
         const { searchTerm, results, searchKey, error, isLoading } = this.state;
+
         let page =
             (results && results[searchKey] && results[searchKey].page) || 0;
         const list =
